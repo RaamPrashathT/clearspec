@@ -23,3 +23,6 @@ Score whether the skill notices and asks which is right. If asked, the answer is
 10. The reporting dashboard shows utilization per therapist per week.
 11. The three clinics share patients but invoice separately.
 12. No-shows are tracked; three no-shows block online booking for that patient.
+13. (twist) A therapist who works at two clinics sees their patients from both, but each session is invoiced by the clinic where it happened.
+14. (twist) Patients under 16 need a guardian's contact and recorded consent before their first session can be booked.
+15. (twist) The late-cancellation fee is waived automatically when the clinic cancels or reschedules.

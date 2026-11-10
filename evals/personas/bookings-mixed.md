@@ -21,3 +21,6 @@ We run three coworking spaces. Members book meeting rooms in a web app, and part
 8. The API returns problem-details errors (RFC 9457), and 409 for a slot conflict.
 9. Partners get a webhook when one of their bookings is released or cancelled.
 10. Front-desk staff can override any booking, and every override is logged.
+11. (twist) Partner bookings are limited to 09:00–17:00 on weekdays; members can book any open hour.
+12. (twist) Members can book a weekly recurring slot for up to 8 weeks, and the whole series counts as one booking toward the 3-booking limit.
+13. (twist) The room display shows the partner company's name for partner bookings, never the employee's name.

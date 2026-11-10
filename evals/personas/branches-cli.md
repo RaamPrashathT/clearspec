@@ -19,3 +19,6 @@ Our repo has hundreds of stale branches. I want a small CLI that cleans them up.
 6. `--json` prints a machine-readable list of what was (or would be) deleted.
 7. Exit codes: 0 success, 1 nothing to clean, 2 usage error, 3 git error.
 8. `--no-input` makes it fail instead of prompting, for CI.
+9. (twist) Branches with an open GitHub pull request are skipped; this needs `GITHUB_TOKEN`, and without it the tool warns once and continues.
+10. (twist) Every deleted branch name and tip SHA is appended to a log in `.git/`, and `tool restore <name>` recreates the branch from it.
+11. (twist) A `.toolclean` file in the repo lists extra protected branch patterns, added to the built-in ones.

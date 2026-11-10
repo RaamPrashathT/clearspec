@@ -5,13 +5,16 @@
 // Then a judge scores hidden-requirement recall against the produced REQUIREMENTS.md.
 //
 // Usage:
-//   node run-persona.mjs <case id or name> [--arm skill|baseline|both] [--max-turns 40] [--budget 20]
+//   node run-persona.mjs <case id or name> [--arm skill|none|both] [--max-turns 40] [--budget 20]
 //                        [--model <skill model>] [--persona-model sonnet] [--judge-model sonnet]
 //                        [--projects <dir>] [--out <dir>] [--skill-dir <dir>]
 //
+// Arms: "skill" runs the skill; "none" runs the same idea with no skill installed; "both" runs both.
 // --skill-dir runs another copy of the skill, such as evals/baselines/baseline-skill-v1, to compare versions.
+// The skill is installed under the name in its SKILL.md frontmatter, and the case's slash command is
+// rewritten to match, so older versions named spec-it still run.
 //
-// Each run works in a fresh git clone of the test project under --out, so the test projects stay clean.
+// Each run copies the test project into a fresh git repo under --out, so the test projects stay clean.
 // Results: <run dir>/result.json and transcript.md; a one-line summary is printed per arm.
 
 import { spawnSync, execFileSync } from "node:child_process";
@@ -32,7 +35,8 @@ const flag = (name, fallback) => {
   return i === -1 ? fallback : argv[i + 1];
 };
 const caseArg = argv.find((a, i) => !a.startsWith("--") && !(i > 0 && argv[i - 1].startsWith("--")));
-const arm = flag("arm", "skill");
+const armArg = flag("arm", "skill");
+const arm = armArg === "baseline" ? "none" : armArg; // "baseline" was the old name for the no-skill arm
 const maxTurns = Number(flag("max-turns", 40));
 const budgetUsd = Number(flag("budget", 20));
 const skillModel = flag("model", null);
@@ -45,13 +49,21 @@ const skillDir = path.resolve(flag("skill-dir", defaultSkillDir));
 const evals = JSON.parse(fs.readFileSync(path.join(here, "evals.json"), "utf8")).evals;
 const testCase = evals.find((e) => String(e.id) === caseArg || e.name === caseArg);
 if (!testCase) {
-  console.error(`Usage: node run-persona.mjs <case> [--arm skill|baseline|both] ...\nCases: ${evals.map((e) => `${e.id} ${e.name}`).join(", ")}`);
+  console.error(`Usage: node run-persona.mjs <case> [--arm skill|none|both] ...\nCases: ${evals.map((e) => `${e.id} ${e.name}`).join(", ")}`);
   process.exit(2);
 }
-if (!["skill", "baseline", "both"].includes(arm)) {
-  console.error('--arm must be "skill", "baseline", or "both".');
+if (!["skill", "none", "both"].includes(arm)) {
+  console.error('--arm must be "skill", "none", or "both".');
   process.exit(2);
 }
+
+// The installed skill's name decides its folder and its slash command.
+const skillName = (fs.readFileSync(path.join(skillDir, "SKILL.md"), "utf8").match(/^name:\s*(\S+)/m) || [])[1];
+if (!skillName) {
+  console.error(`No "name:" in ${path.join(skillDir, "SKILL.md")}`);
+  process.exit(2);
+}
+const skillPrompt = testCase.prompt.replace(/^\/[\w:-]+/, `/${skillName}`);
 
 // ---------- Claude CLI ----------
 
@@ -109,7 +121,7 @@ Rules:
 Persona brief:
 ${personaText}`;
 
-const baselinePrompt = `I want a product requirements spec for this idea: "${idea}".
+const noSkillPrompt = `I want a product requirements spec for this idea: "${idea}".
 Interview me about anything unclear first, one round at a time. Then write REQUIREMENTS.md for a coding agent, plus offline HTML mockups (or an API reference or CLI transcripts if that fits better), into a folder named clearspec/ in this project.`;
 
 const JUDGE_SYSTEM = `You grade whether a product spec captured specific requirements. For each numbered hidden requirement, decide if the spec states it clearly enough that a coding agent would build it: as a functional requirement, an edge case, an acceptance criterion, or an explicit rule. Partial or vague mentions count as not found. Answer with JSON only: an array of {"n": <number>, "found": true|false, "evidence": "<short quote from the spec or empty>"}.`;
@@ -118,10 +130,15 @@ const JUDGE_SYSTEM = `You grade whether a product spec captured specific require
 
 function cloneProject(dest, withSkill) {
   const src = path.join(projectsDir, testCase.project);
-  if (!fs.existsSync(path.join(src, ".git"))) throw new Error(`Test project not found or not a git repo: ${src}`);
-  execFileSync("git", ["clone", "-q", src, dest]);
+  if (!fs.existsSync(src)) throw new Error(`Test project not found: ${src}`);
+  // Copy the scaffold and commit it, so the skill sees an ordinary git project.
+  fs.cpSync(src, dest, { recursive: true, filter: (p) => !p.split(path.sep).some((s) => s === "node_modules" || s === ".git") });
+  const git = (...a) => execFileSync("git", ["-C", dest, ...a], { stdio: "ignore" });
+  git("init", "-q");
+  git("add", "-A");
+  git("-c", "user.name=eval", "-c", "user.email=eval@example.invalid", "commit", "-q", "-m", "Initial scaffold");
   if (withSkill) {
-    const target = path.join(dest, ".claude", "skills", "clearspec");
+    const target = path.join(dest, ".claude", "skills", skillName);
     fs.mkdirSync(target, { recursive: true });
     for (const part of ["SKILL.md", "references", "assets", "scripts"]) {
       fs.cpSync(path.join(skillDir, part), path.join(target, part), { recursive: true });
@@ -141,7 +158,18 @@ function findFiles(dir, name, acc = []) {
 
 function hiddenRequirements() {
   const section = personaText.split(/^## Hidden requirements.*$/m)[1] || "";
-  return [...section.matchAll(/^\s*(\d+)\.\s+(.+)$/gm)].map((m) => ({ n: Number(m[1]), text: m[2].trim() }));
+  // "(twist)" marks a requirement that goes against the usual default, so prior art alone won't find it.
+  return [...section.matchAll(/^\s*(\d+)\.\s+(.+)$/gm)].map((m) => {
+    const raw = m[2].trim();
+    const twist = /^\(twist\)\s*/i.test(raw);
+    return { n: Number(m[1]), text: raw.replace(/^\(twist\)\s*/i, ""), twist };
+  });
+}
+
+/** Share of a set of hidden requirements the judge found, or null when the set is empty. */
+function recallOf(hidden, grades) {
+  if (!hidden.length) return null;
+  return hidden.filter((h) => grades.find((g) => g.n === h.n && g.found)).length / hidden.length;
 }
 
 function runArm(armName) {
@@ -175,7 +203,7 @@ function runArm(armName) {
 
   let skillSession = null;
   let personaSession = null;
-  let message = armName === "skill" ? testCase.prompt : baselinePrompt;
+  let message = armName === "skill" ? skillPrompt : noSkillPrompt;
   let stop = "max-turns";
   let error = null;
 
@@ -268,6 +296,8 @@ function runArm(armName) {
     skillTurns: totals.skillTurns,
     questions,
     recall,
+    standardRecall: recallOf(hidden.filter((h) => !h.twist), grades),
+    twistRecall: recallOf(hidden.filter((h) => h.twist), grades),
     found: grades.filter((g) => g.found).map((g) => g.n),
     missed: hidden.filter((h) => !grades.find((g) => g.n === h.n && g.found)).map((h) => `${h.n}. ${h.text}`),
     check,
@@ -279,7 +309,8 @@ function runArm(armName) {
   };
   fs.writeFileSync(path.join(runDir, "result.json"), JSON.stringify(result, null, 2) + "\n");
 
-  const pct = recall == null ? "n/a" : `${Math.round(recall * 100)}%`;
+  const fmt = (r) => (r == null ? "n/a" : `${Math.round(r * 100)}%`);
+  const pct = `${fmt(recall)} (standard ${fmt(result.standardRecall)}, twist ${fmt(result.twistRecall)})`;
   const chk = check && "errors" in check ? `${check.errors} errors` : "no check";
   console.log(
     `${testCase.name} [${armName}] stop=${stop} turns=${totals.skillTurns} questions=${questions ?? "n/a"} recall=${pct} check=${chk} cost=$${result.costUsd} time=${result.minutes}m\n  ${path.relative(process.cwd(), runDir)}` +
@@ -288,4 +319,4 @@ function runArm(armName) {
   return result;
 }
 
-for (const a of arm === "both" ? ["skill", "baseline"] : [arm]) runArm(a);
+for (const a of arm === "both" ? ["skill", "none"] : [arm]) runArm(a);

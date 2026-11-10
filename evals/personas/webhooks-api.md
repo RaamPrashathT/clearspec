@@ -19,3 +19,6 @@ Our customers want events pushed to their servers instead of polling. I want a r
 6. Customers can replay any delivery from the last 30 days.
 7. Event ordering is not guaranteed, and the docs say so.
 8. Payloads over 256 KB are rejected at publish time with a 413 error.
+9. (twist) Per endpoint, customers choose full payloads or thin events (event id and type only, fetched through the API).
+10. (twist) Customers can set a maintenance window per endpoint; deliveries pause during it and failures in it do not count toward retries or auto-disable.
+11. (twist) Endpoint URLs must be HTTPS and must not resolve to private or loopback IP ranges, checked at registration and again on each delivery.

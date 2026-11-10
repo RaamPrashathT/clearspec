@@ -24,3 +24,6 @@ Four of us share a flat. The group chat is full of "who paid for internet?". I w
 8. One email when someone records a payback to you; no other notifications.
 9. Joining is by invite link, no passwords.
 10. Recurring expenses (rent) are out of scope for v1.
+11. (twist) Balances are shown per pair ("Raj owes Ana $12"); the app never simplifies or re-routes debts between members.
+12. (twist) The member who recorded a payback can undo it within 24 hours; after that it is locked.
+13. (twist) Each household has its own currency, chosen at creation (the second household with the partner uses EUR).
