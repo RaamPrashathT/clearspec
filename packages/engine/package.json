@@ -1,0 +1,7 @@
+{
+  "name": "@clearspec/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runs the clearspec skill through the Claude Agent SDK or any ACP agent: sessions, questions, saved runs."
+}

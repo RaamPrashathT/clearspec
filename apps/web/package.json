@@ -1,0 +1,7 @@
+{
+  "name": "@clearspec/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hosted clearspec: landing page, GitHub sign-in, and the web app on Cloudflare."
+}

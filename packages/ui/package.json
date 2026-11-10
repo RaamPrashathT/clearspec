@@ -1,0 +1,7 @@
+{
+  "name": "@clearspec/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared React + shadcn/ui views and components for the CLI and the web app."
+}

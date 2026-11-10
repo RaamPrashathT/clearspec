@@ -1,0 +1,7 @@
+{
+  "name": "clearspec",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local web app: run clearspec with the coding agent you already use."
+}
