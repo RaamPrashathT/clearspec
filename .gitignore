@@ -1,0 +1,21 @@
+# Dependencies and build output
+node_modules/
+dist/
+*.tgz
+
+# Eval runs and fixture projects (each test project keeps its own git history)
+evals/test-projects/_runs/
+evals/test-projects/0*/
+
+# Local / OS
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Cloudflare local dev
+.dev.vars
+.wrangler/

@@ -1,0 +1,14 @@
+{
+  "name": "clearspec-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check:fixtures": "node scripts/check-fixtures.mjs",
+    "eval": "node evals/run-persona.mjs",
+    "test": "pnpm run check:fixtures && pnpm -r --if-present test"
+  }
+}
