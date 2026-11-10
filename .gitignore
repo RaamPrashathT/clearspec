@@ -3,9 +3,8 @@ node_modules/
 dist/
 *.tgz
 
-# Eval runs and fixture projects (each test project keeps its own git history)
+# Eval runs
 evals/test-projects/_runs/
-evals/test-projects/0*/
 
 # Local / OS
 .env

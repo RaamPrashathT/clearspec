@@ -1,6 +1,6 @@
 # clearspec test projects
 
-Each folder is its own git repo with a clean scaffold committed, and the clearspec skill installed at `.claude/skills/clearspec/` (git-ignored, so resets keep it).
+Small project scaffolds the evals run the skill against. They're plain folders in this repo; every run copies one into a fresh git repo outside it, so these stay clean.
 
 | Project | Contents | Tests | Example rough idea |
 |---|---|---|---|
@@ -11,36 +11,22 @@ Each folder is its own git repo with a clean scaffold committed, and the clearsp
 | `05-react-design-system` | "Plotline" agency app: React + Tailwind with custom `@theme` tokens, Button, Input, StatusBadge, AppShell, a Projects table | reusing existing tokens and shell | "let clients approve deliverables" |
 | `06-mixed` | React + Tailwind `web/` and Express `server/` as npm workspaces, `/api` proxied | mixed artifacts, shared fixtures | "meeting room booking with a partner API" |
 
-Automated persona runs: `node ../run-persona.mjs <case id> --arm both` (see `evals/README.md`). Results go to `_runs/`.
+Don't put notes inside a project folder: the skill scans the project, and a note there would leak into the run.
 
-Keep idea notes here, not inside the projects: the skill scans the project folder, and a note inside it would leak into the run.
+## Automated runs
 
-## Run a test
+`node evals/run-persona.mjs <case id> --arm both` from the repo root. See [../README.md](../README.md). Results go to `_runs/` (git-ignored).
 
-1. Open a new Claude Code session with the project folder as its working directory (for example `test-projects/01-react-tailwind`). Start it there so the skill scans that project only and writes `clearspec/` inside it.
-2. Type `/clearspec "your rough idea"` and answer as yourself.
-3. When it finishes, check the result from that folder:
-   ```bash
-   node .claude/skills/clearspec/scripts/check.mjs clearspec/<unit>
-   ```
-   and open `clearspec/<unit>/mockups/index.html`.
-
-## Reset a project
-
-From inside the project folder. This deletes the run's output (`clearspec/` and anything else created) and restores the committed files:
+## Try the skill by hand
 
 ```bash
-git checkout -- . && git clean -fd
+node evals/test-projects/try-project.mjs 04-node-cli
 ```
 
-`node_modules` and the skill copy are git-ignored, so they stay.
-
-## After changing the skill
-
-From this folder, copy the current skill into every project:
+It copies the project to a temp folder, commits it, installs the current skill into its `.claude/skills/`, and prints the path. Open Claude Code there, run `/clearspec "your rough idea"`, and answer as yourself. Then check the result from that folder:
 
 ```bash
-node sync-skill.mjs
+node .claude/skills/clearspec/scripts/check.mjs clearspec/<name>
 ```
 
-It copies `SKILL.md`, `references/`, `assets/`, and `scripts/`, never `evals/`.
+and open `clearspec/<name>/mockups/index.html`. Pass `--skill-dir evals/baselines/baseline-skill-v2` to try an older version.

@@ -1,0 +1,6 @@
+node_modules
+dist
+.env
+
+# spec-it skill copy, refreshed by ../sync-skill.mjs; kept out of git so resets leave it in place
+.claude/skills/
