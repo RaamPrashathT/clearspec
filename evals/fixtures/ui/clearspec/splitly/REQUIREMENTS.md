@@ -1,30 +1,26 @@
 # Requirements: Splitly
 
-Spec ID: sample-ui · Status: Final · Date: 2026-11-03 · Type: UI · Size: S
+Status: Confirmed · Type: UI · Date: 2026-11-03 · Phases: 1 · Modules: none
 
-## 0. How to use this spec
-
-This spec is written for a coding agent that builds the product.
-
-- IDs are permanent: `FR-n` requirement, `EC-n` edge case, `D-n` decision, `A-n` assumption.
-- Done means: every Must FR's acceptance criteria pass, and every EC behaves as stated.
-- Artifacts in §10 are visual and behavioral reference. Match what they show; do not copy their code.
-- `assets/fixtures.js` doubles as seed data and test data.
+<!-- For the coding agent: read §1–4 for intent, §Glossary for names, §Functional requirements and §Edge cases for behavior, §Mockups for what it looks like. IDs are permanent. Done means every Must FR in the current phase passes its Given/When/Then and every linked EC behaves as stated. Confirm each A-n before building on it. Mockups are visual and behavioral reference: match them, do not copy their code. fixtures.js doubles as seed and test data. -->
 
 ## 1. Overview
 
-Roommates lose track of who paid for shared bills. Splitly keeps one running ledger per household and lets people record paybacks.
+Roommates lose track of who paid for shared bills, and the group chat ends up as the accounting system. Splitly keeps one running ledger per household and lets people record paybacks.
 
-## 2. Goals, non-goals, success metrics
+Restate:
+- Outcome: A shared ledger showing who owes whom, with settle-up.
+- User: Roommates, 2–8 per household.
+- Why now: The group chat is the accounting system.
+- Success: Anyone sees their balance in under 5 seconds.
+- Constraint: Records paybacks only; no money moves in the app.
+- Out of scope: Payments, multi-currency.
 
-Goals:
-- Everyone sees their balance at a glance (D-1).
+## 2. Context
 
-Non-goals:
-- Moving money inside the app (D-2).
-
-Success metrics:
-- A member finds their balance in under 5 seconds.
+- Repo: empty project.
+- Prior art: Splitwise · running balances and settle-up · we take the balance view, reject in-app payments.
+- Hard problems in this domain: an amount edited while someone settles up (EC-1).
 
 ## 3. Users and roles
 
@@ -32,20 +28,27 @@ Success metrics:
 |---|---|---|---|
 | Member | A roommate in the household | Add expenses, record paybacks | Delete other members |
 
-## 4. Glossary
+## 4. Delivery plan
+
+| Phase | Ships | Done when |
+|---|---|---|
+| 1 | Balances and settle-up | A member sees their balance and records a payback |
+
+## 5. Glossary
 
 - **Household**: the group that shares a ledger. Not "group".
 
-## 5. User flows
+## 6. User flows
 
 ### Flow: Settle up
-1. Raj opens the dashboard and sees he owes Ana.
-2. Raj records a payback on the settle-up screen.
+1. Raj opens the dashboard (01-dashboard) and sees he owes Ana.
+2. Raj records a payback on the settle-up screen (02-settle-up).
 
-## 6. Functional requirements
+## 7. Functional requirements
 
 ### FR-1 · Must · See balances
 The dashboard lists each member's net balance.
+Phase: 1
 - Given Raj owes Ana $42.50
 - When Raj opens the dashboard
 - Then he sees "You owe Ana Souza $42.50"
@@ -54,6 +57,7 @@ Shown in: mockups/01-dashboard.html
 
 ### FR-2 · Must · Record a payback
 A member records that they paid someone back.
+Phase: 1
 - Given Raj owes Ana $42.50
 - When Raj records a payback of $42.50 to Ana
 - Then both balances show $0.00
@@ -62,13 +66,14 @@ Shown in: mockups/02-settle-up.html
 
 ### FR-3 · Should · Single currency
 All amounts use USD.
+Phase: 1
 - Given any expense
 - When it is displayed
 - Then it is formatted as USD
 Source: D-4
 Shown in: none (no UI)
 
-## 7. Edge cases
+## 8. Edge cases
 
 ### EC-1 · Amount changed during settle-up
 Scenario: Mei edits the internet bill from $60.00 to $75.00 while Raj is settling up.
@@ -82,45 +87,49 @@ Expected: The dashboard says everyone is settled and offers "Add expense".
 Linked: FR-1
 State: mockups/01-dashboard.html?state=all-settled
 
-## 8. Data model
+## 9. Data model
 
 | Entity | Key fields | Relationships | Rules | Lifecycle |
 |---|---|---|---|---|
 | Expense | id, title, amount, paidBy, date | belongs to Household | amount > 0 | editable until settled |
 
-## 9. Non-functional requirements
+## 10. Non-functional requirements
 
-- **Accessibility:** WCAG 2.2 AA
+- Accessibility: WCAG 2.2 AA.
 
-## 10. Artifact index
+## 11. Technical decisions
+
+- Constraints from the repo: none yet; empty project (D-5).
+
+## 12. Design direction
+
+- Use scene: roommates on phones in a bright kitchen.
+- Theme: light. Palette: neutral paper, ink text, teal action. Type: system stack. Density: compact.
+- Layout: one column list of balances.
+- Signature move: balances read as "who → whom" lines.
+- Rejected defaults: card grid for balances; purple accent.
+
+## 13. Mockups
 
 | Artifact | File | States | FRs | ECs |
 |---|---|---|---|---|
 | 01 Dashboard | mockups/01-dashboard.html | populated, all-settled | FR-1 | EC-2 |
 | 02 Settle up | mockups/02-settle-up.html | normal, amount-changed | FR-2 | EC-1 |
 
-## 11. Constraints and boundaries
-
-- Stack and integrations: none yet (D-5).
-
-## 12. Design direction
-
-Light, compact ledger. See design.md.
-
-## 13. Assumptions
+## 14. Assumptions
 
 - A-1 · USD only · default: USD · from D-4
 
-## 14. Open questions and risks
+## 15. Open questions and risks
 
 - None.
 
-## 15. Decision log
+## Decisions
 
-| ID | Decision | Answer | Provenance | Q |
+| ID | Decision | Answer | Provenance | Why |
 |---|---|---|---|---|
-| D-1 | Core job | Running balances plus settle-up | own | Q1 |
-| D-2 | Money movement | Record only | accepted | Q2 |
-| D-3 | Changed amount | Warn first | own | Q3 |
-| D-4 | Currency | USD | assumed | Q4 |
-| D-5 | Stack | No code | fact | |
+| D-1 | Core job | Running balances plus settle-up | own | The pain is history, not calculation |
+| D-2 | Money movement | Record paybacks only | accepted | Payments are a different product |
+| D-3 | Changed amount | Warn and show the new amount before confirming | own | Prevents paying back a stale amount |
+| D-4 | Currency | USD only | assumed | Standard default for one household |
+| D-5 | Stack | No code yet | fact | Empty repo |
