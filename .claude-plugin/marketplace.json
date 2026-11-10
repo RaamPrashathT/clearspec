@@ -1,0 +1,14 @@
+{
+  "name": "clearspec",
+  "description": "Turn an idea into a REQUIREMENTS.md a coding agent can build from, plus clickable mockups.",
+  "owner": {
+    "name": "RaamPrashathT"
+  },
+  "plugins": [
+    {
+      "name": "clearspec",
+      "source": "./plugins/clearspec",
+      "description": "Researches your codebase and prior art, asks only the questions that change what gets built, then writes REQUIREMENTS.md and offline mockups."
+    }
+  ]
+}
