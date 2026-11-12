@@ -3,7 +3,7 @@
 export const AGENTS = [
   { id: "claude", name: "Claude Code", kind: "claude-sdk", loginHint: "Run `claude` once in a terminal and log in." },
   { id: "codex", name: "Codex CLI", kind: "acp", loginHint: "Run `codex login` in a terminal." },
-  { id: "copilot", name: "GitHub Copilot CLI", kind: "acp", loginHint: "Run `copilot` in a terminal and use /login." },
+  { id: "copilot", name: "GitHub Copilot CLI", kind: "copilot-sdk", loginHint: "Run `gh auth login` (or `copilot login`) in a terminal." },
   { id: "cursor", name: "Cursor Agent", kind: "acp", loginHint: "Run `cursor-agent login` (or `agent login`) in a terminal." },
   { id: "gemini", name: "Gemini CLI", kind: "acp", loginHint: "Run `gemini` once in a terminal and sign in." },
   { id: "opencode", name: "OpenCode", kind: "acp", loginHint: "Run `opencode auth login`." },

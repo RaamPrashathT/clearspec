@@ -6,12 +6,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { WebSocketServer } from "ws";
-import { describeAgents, getAgent, splitCommand, launchCommand } from "./agents.mjs";
+import { describeAgents, getAgent, splitCommand, launchCommand, which } from "./agents.mjs";
 import { pickFolder } from "./folder-picker.mjs";
-import { claudeInfo, acpInfo } from "./agent-info.mjs";
+import { claudeInfo, acpInfo, copilotInfo } from "./agent-info.mjs";
 import { Session } from "./session.mjs";
 import { ClaudeSdkAdapter } from "./adapters/claude-sdk.mjs";
 import { AcpAdapter } from "./adapters/acp.mjs";
+import { CopilotSdkAdapter } from "./adapters/copilot-sdk.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -57,7 +58,7 @@ export function startServer({ port = 0, skillDir, defaultProject = process.cwd()
       const parts = splitCommand(String(body.customCommand ?? ""));
       if (!parts.length) throw new Error("Enter the agent's ACP launch command.");
       [command, ...args] = parts;
-    } else if (agent.kind === "acp") {
+    } else if (agent.kind !== "claude-sdk") {
       ({ command, args } = launchCommand(agent));
     }
     return { agent, projectDir, command, args };
@@ -72,11 +73,21 @@ export function startServer({ port = 0, skillDir, defaultProject = process.cwd()
     const appUrl = `http://127.0.0.1:${server.address().port}`;
     if (agent.kind === "claude-sdk") {
       s.adapter = new ClaudeSdkAdapter(s, { skillDir });
+    } else if (agent.kind === "copilot-sdk") {
+      s.adapter = new CopilotSdkAdapter(s, { skillDir });
     } else {
       s.adapter = new AcpAdapter(s, { skillDir, command, args, appUrl, token });
     }
     sessions.set(s.id, s);
-    s.adapter.start().catch((err) => { s.emitEvent({ type: "error", message: err.message }); s.setState("error", err.message); });
+    const failed = (err) => { s.emitEvent({ type: "error", message: err.message }); s.setState("error", err.message); };
+    s.adapter.start().catch((err) => {
+      // Copilot without its SDK: fall back to the Copilot CLI over ACP, if that is installed.
+      if (err.sdkUnavailable && agent.kind === "copilot-sdk" && which(command)) {
+        s.emitEvent({ type: "text", role: "system", id: "fallback", text: "The Copilot SDK isn't available here; using the Copilot CLI over ACP instead." });
+        s.adapter = new AcpAdapter(s, { skillDir, command, args, appUrl, token });
+        s.adapter.start().catch(failed);
+      } else failed(err);
+    });
     return s;
   }
 
@@ -104,6 +115,9 @@ export function startServer({ port = 0, skillDir, defaultProject = process.cwd()
         try {
           const t = resolveTarget(body);
           if (t.agent.kind === "claude-sdk") return send(res, 200, await claudeInfo({ authMode: "cli", cwd: t.projectDir }));
+          if (t.agent.kind === "copilot-sdk") {
+            try { return send(res, 200, await copilotInfo()); } catch (err) { if (!err.sdkUnavailable) throw err; }
+          }
           return send(res, 200, await acpInfo({ command: t.command, args: t.args, cwd: t.projectDir, env: { ...process.env } }));
         } catch (err) { return send(res, 200, { error: err.message, models: [], limits: [] }); }
       }

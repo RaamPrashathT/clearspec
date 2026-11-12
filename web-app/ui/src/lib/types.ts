@@ -3,7 +3,7 @@
 export type AgentInfo = {
   id: string
   name: string
-  kind: "claude-sdk" | "acp"
+  kind: "claude-sdk" | "copilot-sdk" | "acp"
   loginHint: string
   command: string | null
   installed: boolean
@@ -32,6 +32,8 @@ export type ProbeInfo = {
   account?: { plan: string | null; organization: string | null; provider: string | null } | null
   agent?: { name?: string; title?: string; version?: string } | null
   limits: Limit[]
+  /** A line to show under the idea box, e.g. "Copilot chooses the model for you". */
+  note?: string
   error?: string
 }
 

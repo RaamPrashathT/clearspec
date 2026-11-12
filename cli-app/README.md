@@ -10,6 +10,8 @@ Keep that window open. Runs started in the web app then run here, with the agent
 
 Agents: Claude Code (Claude Agent SDK), Codex, GitHub Copilot CLI, Cursor Agent, Gemini CLI, OpenCode, or any ACP agent. The registry is `src/agents.mjs`.
 
+GitHub Copilot runs through the official `@github/copilot-sdk`, which bundles its own Copilot runtime (about 190 MB per platform, downloaded once by npm; it is an optional dependency). It signs in with your existing GitHub CLI or Copilot login, lists the models and plan tiers your account has, and takes questions natively. If the SDK can't be installed, the helper falls back to the Copilot CLI over ACP when `copilot` is on your PATH.
+
 ## How it works
 
 ```

@@ -4,6 +4,7 @@
 import { spawn } from "node:child_process";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { isWin } from "./agents.mjs";
+import { loadCopilotSdk, modelOptions } from "./adapters/copilot-sdk.mjs";
 
 const cache = new Map(); // key -> { at, value }
 const TTL = 60_000;
@@ -117,4 +118,32 @@ export function acpInfo({ command, args, cwd, env }) {
       done(resolve, value);
     })().catch((e) => done(reject, e));
   });
+}
+
+/** GitHub Copilot through its SDK: who is signed in, and the models / plan tiers this account can pick. */
+export async function copilotInfo() {
+  const sdk = await loadCopilotSdk();
+  const client = new sdk.CopilotClient({ logLevel: "none" });
+  await client.start();
+  try {
+    const [auth, list] = await Promise.all([client.getAuthStatus().catch(() => null), client.rpc.models.list()]);
+    const models = modelOptions(list);
+    const tiers = (list?.auto?.tiers ?? []).filter((t) => t.status?.pickerVisible && t.id !== list?.auto?.defaultTier);
+    const locked = tiers.filter((t) => !t.status?.enabled).map((t) => t.displayName);
+    const def = (list?.auto?.tiers ?? []).find((t) => t.id === list?.auto?.defaultTier)?.displayName;
+    return {
+      source: "copilot-sdk",
+      models: models.length > 1 ? models : [],
+      currentModel: "",
+      efforts: null,
+      account: auth ? { plan: auth.login ? `${auth.login} (${auth.authType ?? "signed in"})` : null, organization: null, provider: "copilot" } : null,
+      agent: { name: "GitHub Copilot" },
+      limits: [],
+      note: models.length > 1
+        ? undefined
+        : `Copilot chooses the model for you (Auto${def ? `, ${def}` : ""}).${locked.length ? ` ${locked.join(" and ")} ${locked.length > 1 ? "aren't" : "isn't"} on your Copilot plan.` : ""}`,
+    };
+  } finally {
+    client.stop().catch(() => client.forceStop?.());
+  }
 }

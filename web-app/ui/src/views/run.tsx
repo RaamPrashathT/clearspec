@@ -85,6 +85,7 @@ export function DraftView({ config, pending, onStarted, onHome }: { config: Conf
               </div>
             )}
             {info?.error && <p className="text-xs text-muted-foreground">Couldn't read agent info: {info.error.split("\n")[0]}</p>}
+            {info?.note && <p className="text-xs text-muted-foreground">{info.note}</p>}
             <div className="grid w-full gap-1.5">
               {EXAMPLES.map((t) => (
                 <Button key={t} type="button" variant="outline" size="sm" className="h-auto justify-start py-2 text-start whitespace-normal" onClick={() => setIdea(t)}>{t}</Button>

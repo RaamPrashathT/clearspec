@@ -5,7 +5,12 @@ const fwd = (p) => p.split(path.sep).join("/");
 
 export function buildKickoff({ skillDir, projectDir, idea, channel }) {
   const skill = fwd(skillDir);
-  const ask = channel === "ask-user-question"
+  const ask = channel === "tool"
+    ? [
+        "- Ask every question by calling your `ask_user` tool. Its input is `{ questions: [{ question, header, multiSelect, options: [{ label, description, preview? }] }] }`, 1–3 independent questions, 2–4 options each, the recommended option first with \"(Recommended)\" in its label.",
+        "- After calling `ask_user`, end your turn at once and write nothing more. The developer's answers arrive as the next user message.",
+      ]
+    : channel === "ask-user-question"
     ? [
         "- Ask every question with your AskUserQuestion tool (1–3 independent questions per call, 2–4 options each, the recommended option first with \"(Recommended)\" in its label). The app renders it as a picker with an \"Other\" field. Option `preview` text (ASCII sketches) is shown next to the options.",
       ]
