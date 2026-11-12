@@ -2,9 +2,7 @@
 node_modules/
 dist/
 *.tgz
-
-# Eval runs
-evals/test-projects/_runs/
+cli-app/skill/
 
 # Local / OS
 .env

@@ -7,7 +7,7 @@ on:
 
 jobs:
   skill:
-    name: Skill checks
+    name: Skill
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,13 +15,34 @@ jobs:
         with:
           node-version: 22
       - name: Script syntax
-        run: |
-          for f in plugins/clearspec/skills/clearspec/scripts/*.mjs evals/run-persona.mjs scripts/*.mjs; do
-            node --check "$f"
-          done
-      - name: Plugin and marketplace manifests are valid JSON
-        run: |
-          node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json','utf8'))"
-          node -e "JSON.parse(require('fs').readFileSync('plugins/clearspec/.claude-plugin/plugin.json','utf8'))"
-      - name: Eval fixtures pass the check script
-        run: node scripts/check-fixtures.mjs
+        run: for f in skill/scripts/*.mjs; do node --check "$f"; done
+
+  helper:
+    name: Helper (cli-app)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+
+  web:
+    name: Web app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm --prefix ui ci
+      - run: npm run typecheck
+      - run: npm run build

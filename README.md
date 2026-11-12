@@ -2,18 +2,17 @@
 
 Turn an idea into a `REQUIREMENTS.md` a coding agent can build from, plus clickable mockups. clearspec researches your codebase and how established products solve the problem, then asks only the questions that change what gets built.
 
-> Work in progress: this repo is being rebuilt. The skill works today; the CLI and web app are being rewritten.
+It is a **skill first** and a web app second.
 
-## Install the skill (Claude Code)
-
-```bash
-claude plugin marketplace add RaamPrashathT/clearspec
-claude plugin install clearspec@clearspec
+```
+skill/      the clearspec skill: SKILL.md, references, templates, check/render scripts
+cli-app/    the `clearspec` npm package: the helper behind `npx clearspec connect`
+web-app/    the hosted app: React UI + Cloudflare Worker with Durable Objects
 ```
 
-Then in a project: `/clearspec:clearspec "an app for roommates to split shared bills"`.
+## 1. The skill (Claude Code)
 
-## What you get
+Copy `skill/` into a project as `.claude/skills/clearspec/` (the folder name must match the skill name), then run `/clearspec "an app for roommates to split shared bills"`. Output goes to `clearspec/<name>/`:
 
 ```
 clearspec/<name>/
@@ -21,30 +20,27 @@ clearspec/<name>/
 └── mockups/             UI screens, or api.html + openapi.yaml, or cli.html + transcripts.md
 ```
 
-## Repository
+## 2. The web app
+
+Sign in with GitHub, pair your computer, pick an agent (Claude Code, Codex, GitHub Copilot CLI or Cursor Agent), describe the idea, answer the questions in the browser, and watch `REQUIREMENTS.md` and the mockups appear.
 
 ```
-.claude-plugin/marketplace.json   Claude Code marketplace entry
-plugins/clearspec/                the plugin; skills/clearspec/ is the skill (single source of truth)
-packages/engine/                  runs the skill through the Claude Agent SDK or ACP agents
-packages/ui/                      shared React UI for the CLI and web app
-apps/cli/                         npm package `clearspec`: local web app
-apps/web/                         hosted app on Cloudflare
-evals/                            personas, fixtures, persona runner, test projects
-examples/                         finished sample specs and mockups
-docs/                             research and design notes
+browser ⇄ Worker + Durable Objects ⇄ outbound WebSocket ⇄ `clearspec connect` (your computer) ⇄ agent CLI
 ```
+
+Agents run on **your** computer with **your** logins. No API key, nothing installed globally: the web app shows one command (`npx -y clearspec@0.1 connect <code> --server <url>`) and you run it once.
+
+- Setup, deploy and GitHub OAuth steps: [web-app/README.md](web-app/README.md)
+- The helper: [cli-app/README.md](cli-app/README.md)
 
 ## Develop
 
-Requires Node 20+ and pnpm.
-
 ```bash
-pnpm install
-pnpm test               # runs the check script on every eval fixture
+cd cli-app && npm install && npm test          # engine against a mock ACP agent
+cd web-app && npm install && npm --prefix ui install
+cp .dev.vars.example .dev.vars && npm run dev   # http://127.0.0.1:8787, sign in at /auth/dev-login
+node test/e2e.mjs http://127.0.0.1:8787         # with the dev server running
 ```
-
-See [evals/README.md](evals/README.md) for persona runs and [CONTRIBUTING.md](CONTRIBUTING.md) for conventions.
 
 ## License
 
