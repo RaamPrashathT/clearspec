@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "cn"
-import { SparklesIcon } from "lucide-react"
+import { SparklesIcon, SquareIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -65,7 +65,7 @@ export function DraftView({ config, pending, onStarted, onHome }: { config: Conf
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <RunHeader title={`${who} on ${pending.connectorName} · ${baseName(pending.projectDir)}`} subtitle={pending.projectDir} status="draft" limits={info?.limits ?? []} usage={null} canStop={false} onStop={() => {}} onHome={onHome} />
+      <RunHeader title={`${who} on ${pending.connectorName} · ${baseName(pending.projectDir)}`} subtitle={pending.projectDir} status="draft" limits={info?.limits ?? []} usage={null} onHome={onHome} />
       <div className="flex min-h-0 flex-1 flex-col items-center overflow-y-auto px-4">
         <Empty className="my-auto max-w-2xl border-0">
           <EmptyHeader>
@@ -133,8 +133,7 @@ export function RunView({ runId, onHome }: { runId: string; onHome: () => void }
         subtitle={s?.projectDir}
         status={state.connected ? state.status : "starting"}
         limits={state.limits} usage={state.usage}
-        canStop={!["done", "stopped", "error"].includes(state.status)}
-        onStop={stop} onHome={onHome}
+        onHome={onHome}
       />
       <div className={cn("grid min-h-0 flex-1", showPreview ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]" : "grid-cols-1")}>
         <section className="flex min-h-0 min-w-0 flex-col">
@@ -143,10 +142,11 @@ export function RunView({ runId, onHome }: { runId: string; onHome: () => void }
           <div className="mx-auto w-full max-w-3xl shrink-0 px-4 pb-4">
             {pending?.kind === "question" && <QuestionDock key={pending.id} runId={runId} item={pending} />}
             {pending?.kind === "approval" && <ApprovalDock key={pending.id} runId={runId} item={pending} />}
+            {pending && <div className="mt-2 flex justify-end"><Button size="sm" variant="ghost" onClick={stop}><SquareIcon /> Stop run</Button></div>}
             {!pending && (
               <Composer
                 placeholder="Reply to the agent (Enter to send, Shift+Enter for a new line)"
-                sendLabel="Send" onSend={send}
+                sendLabel="Send" onSend={send} running={busy} onStop={stop}
                 models={state.models?.options ?? null} model={state.models?.current ?? ""}
                 onModelChange={state.models && state.models.options.length > 1 ? switchModel : undefined}
               />

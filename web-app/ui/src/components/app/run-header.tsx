@@ -1,7 +1,6 @@
-import { CheckIcon, SquareIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
 import { cn } from "cn"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { PHASES } from "@/hooks/use-run"
 import { fmtK, resetText } from "@/lib/api"
@@ -65,8 +64,6 @@ export function RunHeader(p: {
   status: string
   limits: Limit[]
   usage: { costUsd: number; inputTokens: number; outputTokens: number; contextUsed?: number; contextSize?: number; budgetUsd?: number | null } | null
-  canStop: boolean
-  onStop: () => void
   onHome: () => void
 }) {
   const st = STATUS[p.status] ?? { label: p.status, variant: "secondary" as const }
@@ -91,7 +88,6 @@ export function RunHeader(p: {
           {u.contextSize ? ` · context ${Math.round((100 * (u.contextUsed ?? 0)) / u.contextSize)}%` : ""}
         </span>
       )}
-      {p.canStop && <Button size="sm" variant="outline" onClick={p.onStop}><SquareIcon /> Stop</Button>}
     </header>
   )
 }

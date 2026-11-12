@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ArrowUpIcon } from "lucide-react"
+import { ArrowUpIcon, SquareIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -24,6 +24,9 @@ export type ComposerProps = {
   onEffortChange?: (v: string) => void
   budget?: string
   onBudgetChange?: (v: string) => void
+  /** The agent is working: with nothing typed, the Send button becomes Stop. */
+  running?: boolean
+  onStop?: () => void
 }
 
 export function Composer(p: ComposerProps) {
@@ -82,9 +85,15 @@ export function Composer(p: ComposerProps) {
           </label>
         )}
         <span className="flex-1" />
-        <Button type="submit" size="sm" disabled={p.disabled || !value.trim()}>
-          {p.sendLabel} <ArrowUpIcon />
-        </Button>
+        {p.running && p.onStop && !value.trim() ? (
+          <Button type="button" size="sm" variant="outline" onClick={p.onStop} aria-label="Stop the run">
+            <SquareIcon /> Stop
+          </Button>
+        ) : (
+          <Button type="submit" size="sm" disabled={p.disabled || !value.trim()}>
+            {p.sendLabel} <ArrowUpIcon />
+          </Button>
+        )}
       </div>
     </form>
   )
