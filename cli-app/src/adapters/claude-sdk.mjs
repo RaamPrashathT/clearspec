@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
-import { buildKickoff } from "../prompt.mjs";
+import { buildKickoff, withReminder } from "../prompt.mjs";
 import { normalizeLimits } from "../agent-info.mjs";
 
 // Auto-approved: reading, research, and file edits inside the project (acceptEdits).
@@ -180,7 +180,7 @@ export class ClaudeSdkAdapter {
   sendUser(text) {
     this.s.emitEvent({ type: "text", role: "user", id: `u${Date.now()}`, text });
     this.s.setState("running");
-    this.inbox.push(userMsg(text));
+    this.inbox.push(userMsg(withReminder(text)));
   }
 
   stop() {

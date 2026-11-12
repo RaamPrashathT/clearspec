@@ -29,6 +29,7 @@ const result = await new Promise((resolve, reject) => {
     const m = JSON.parse(raw.toString());
     for (const e of m.type === "hello" ? m.events : [m]) {
       seen.add(e.type);
+      if (e.type === "tool") console.log("  tool:", e.title);
       if (e.type === "approval") { console.log("approval asked:", e.title); await post(`/api/sessions/${session.id}/answer`, { id: e.id, value: "allow" }); }
       if (e.type === "error") { clearTimeout(timer); reject(new Error("run error: " + e.message)); }
       if (e.type === "question") { clearTimeout(timer); console.log("question reached the UI:", e.questions[0].question); resolve("question"); }

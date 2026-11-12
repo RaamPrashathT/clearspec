@@ -4,7 +4,7 @@
 // If the SDK isn't installed, start() throws an error with `sdkUnavailable: true` and server.mjs falls back to ACP.
 import path from "node:path";
 import { z } from "zod";
-import { buildKickoff, formatAnswers } from "../prompt.mjs";
+import { buildKickoff, formatAnswers, withReminder } from "../prompt.mjs";
 
 const inside = (p, base) => {
   const rel = path.relative(path.resolve(base), path.resolve(String(p)));
@@ -168,7 +168,7 @@ export class CopilotSdkAdapter {
 
   sendUser(text) {
     this.s.emitEvent({ type: "text", role: "user", id: `u${Date.now()}`, text });
-    return this.sendRaw(text);
+    return this.sendRaw(withReminder(text));
   }
 
   fail(message, kind = "other") {

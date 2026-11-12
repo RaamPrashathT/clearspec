@@ -70,6 +70,8 @@ export function startServer({ port = 0, skillDir, defaultProject = process.cwd()
     if (!idea) throw new Error("Describe the idea first.");
 
     const s = new Session({ agent, authMode: "cli", projectDir, idea, model: String(body.model ?? ""), effort: String(body.effort ?? ""), budgetUsd: Number(body.budgetUsd) || 0 });
+    // The idea is the first chat message, so the run reads like a conversation from the start.
+    s.emitEvent({ type: "text", role: "user", id: "idea", text: idea });
     const appUrl = `http://127.0.0.1:${server.address().port}`;
     if (agent.kind === "claude-sdk") {
       s.adapter = new ClaudeSdkAdapter(s, { skillDir });

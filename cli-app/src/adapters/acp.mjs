@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { isWin } from "../agents.mjs";
-import { buildKickoff, formatAnswers, extractQuestionBlock } from "../prompt.mjs";
+import { buildKickoff, formatAnswers, extractQuestionBlock, withReminder } from "../prompt.mjs";
 
 const BRIDGE = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "mcp-bridge.mjs");
 
@@ -261,14 +261,15 @@ export class AcpAdapter {
 
   async prompt(text, { silent = false } = {}) {
     if (!silent) this.s.emitEvent({ type: "text", role: "user", id: `u${Date.now()}`, text });
-    if (this.turnActive) { this.queue.push(text); return; }
+    const wire = silent ? text : withReminder(text); // what the agent sees; the chat shows only `text`
+    if (this.turnActive) { this.queue.push(wire); return; }
     this.turnActive = true;
     this.turnText = "";
     this.askedThisTurn = false;
     this.curId = null;
     this.s.setState("running");
     try {
-      const res = await this.request("session/prompt", { sessionId: this.sessionId, prompt: [{ type: "text", text }] });
+      const res = await this.request("session/prompt", { sessionId: this.sessionId, prompt: [{ type: "text", text: wire }] });
       this.turnActive = false;
       this.s.refreshOutputs();
       if (res.stopReason === "cancelled") return this.s.setState("stopped");

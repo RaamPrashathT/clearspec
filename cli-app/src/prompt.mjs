@@ -33,6 +33,11 @@ export function buildKickoff({ skillDir, projectDir, idea, channel }) {
     "- The app shows REQUIREMENTS.md and the mockups live from disk, so do not start serve.mjs and do not ask the developer to open files.",
     "- Never start a long-running process.",
     "",
+    "Stay on task:",
+    "- This is a NEW run. There is no earlier work to resume. If `clearspec/` is missing or empty, start at step 1 of the skill. Do not look for earlier runs, notes or state.",
+    "- The idea below is the whole task. Follow the skill's steps in order; do not invent extra research.",
+    "- Use the web only for the skill's prior-art step: how established products solve THIS idea. Never browse for other skills, other repositories or interview methodologies.",
+    "",
     "The idea ($ARGUMENTS):",
     idea.trim(),
   ].join("\n");
@@ -61,3 +66,11 @@ export function extractQuestionBlock(text) {
     return null;
   }
 }
+
+/**
+ * Appended (invisibly) to every follow-up message the developer types, so a long run does not drift off the skill.
+ * It is only a reminder: if the developer asks for something different, that wins.
+ */
+export const REMINDER = "[clearspec reminder, not from the developer: you are running the clearspec skill in this app. Keep following SKILL.md for this run unless the message above asks for something different. Don't browse for unrelated material or look for earlier runs.]";
+
+export const withReminder = (text) => `${text}\n\n${REMINDER}`;

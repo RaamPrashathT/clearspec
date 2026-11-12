@@ -55,6 +55,8 @@ const done = new Promise((resolve, reject) => {
 });
 
 await done;
+assert.ok(events.some((e) => e.type === "text" && e.role === "user" && e.id === "idea"), "the idea is not shown as the first chat message");
+assert.ok(!events.some((e) => typeof e.text === "string" && e.text.includes("clearspec reminder")), "the background reminder leaked into the chat");
 assert.ok(events.some((e) => e.type === "question"), "agent never asked a question through ask_user");
 assert.ok(events.some((e) => e.type === "outputs" && e.outputs.some((o) => o.requirements)), "no REQUIREMENTS.md was reported");
 assert.ok(fs.existsSync(path.join(project, "clearspec", "mock-spec", "REQUIREMENTS.md")), "REQUIREMENTS.md not written under clearspec/");
