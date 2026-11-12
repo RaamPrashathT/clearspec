@@ -1,6 +1,6 @@
 import * as React from "react"
 import {
-  ArrowRightIcon, CheckIcon, ChevronDownIcon, CopyIcon, FolderOpenIcon, LogOutIcon, PlusIcon, RefreshCwIcon, Trash2Icon,
+  AlertTriangleIcon, ArrowRightIcon, CheckIcon, ChevronDownIcon, CopyIcon, FolderOpenIcon, LogOutIcon, PlusIcon, RefreshCwIcon, Trash2Icon,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -97,12 +97,37 @@ function AddComputer({ known, onPaired, onCancel }: { known: Set<string>; onPair
 }
 
 function AgentChoice({ a }: { a: AgentInfo }) {
+  const needed = a.installed && a.login === "needed"
+  const badge = a.id === "custom" ? undefined
+    : !a.installed ? <Badge variant="outline">Not installed</Badge>
+    : needed ? <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400">Needs sign-in</Badge>
+    : a.login === "unknown" ? <Badge variant="secondary">Installed</Badge>
+    : <Badge variant="secondary">Ready</Badge>
   return (
     <Choice
-      value={a.id} title={a.name} disabled={!a.installed}
-      badge={a.id === "custom" ? undefined : a.installed ? <Badge variant="secondary">Ready</Badge> : <Badge variant="outline">Not installed</Badge>}
-      description={a.id === "custom" ? "Any agent that speaks ACP" : a.installed ? "Uses your existing sign-in" : a.loginHint}
+      value={a.id} title={a.name} disabled={!a.installed} badge={badge}
+      description={a.id === "custom" ? "Any agent that speaks ACP" : !a.installed ? a.loginHint : needed ? "Sign in on that computer, then check again" : a.login === "unknown" ? "Sign-in can't be checked from here" : "Uses your existing sign-in"}
     />
+  )
+}
+
+/** Shown under the agent list when the chosen agent is signed out (or can't tell us). */
+function LoginNotice({ agent, checking, onCheck }: { agent: AgentInfo; checking: boolean; onCheck: () => void }) {
+  if (!agent.installed || agent.id === "custom" || !agent.login || agent.login === "ok") return null
+  const needed = agent.login === "needed"
+  return (
+    <div className={`flex flex-wrap items-center gap-3 rounded-lg border p-3 text-sm ${needed ? "border-amber-500/40 bg-amber-500/5" : "bg-muted/40"}`}>
+      <AlertTriangleIcon className={`size-4 shrink-0 ${needed ? "text-amber-500" : "text-muted-foreground"}`} />
+      <div className="min-w-0 flex-1">
+        <p className="font-medium">{needed ? `You're not signed in to ${agent.name}` : `Couldn't check the ${agent.name} sign-in`}</p>
+        <p className="text-xs text-muted-foreground">
+          {agent.loginHint} {needed ? "Then come back and check again." : "If a run fails with a sign-in error, do this and start again."}
+        </p>
+      </div>
+      <Button type="button" size="sm" variant="outline" onClick={onCheck} disabled={checking}>
+        {checking ? <Spinner /> : <RefreshCwIcon />} Check again
+      </Button>
+    </div>
   )
 }
 
@@ -112,6 +137,7 @@ export function Setup({ me, onContinue }: { config: Config; me: Me; onContinue: 
   const [connectorId, setConnectorId] = React.useState<string>(saved.connectorId ?? "")
   const [adding, setAdding] = React.useState(false)
   const [agents, setAgents] = React.useState<AgentInfo[] | null>(null)
+  const [checking, setChecking] = React.useState(false)
   const [agentsError, setAgentsError] = React.useState("")
   const [agentId, setAgentId] = React.useState<string>(saved.agentId ?? "claude")
   const [customCommand, setCustomCommand] = React.useState<string>(saved.customCommand ?? "")
@@ -136,21 +162,39 @@ export function Setup({ me, onContinue }: { config: Config; me: Me; onContinue: 
 
   const computer = computers?.find((c) => c.id === connectorId)
 
-  // Which agents are installed on the chosen computer (asked live).
+  // Which agents are installed on the chosen computer, and whether each is signed in (asked live).
+  const loadAgents = React.useCallback(async (fresh: boolean) => {
+    if (!computer?.online) return
+    try {
+      const c = await api<Config>(`/api/connectors/${computer.id}/config`, fresh ? { fresh: true } : {})
+      const order = (id: string) => (FEATURED.includes(id) ? FEATURED.indexOf(id) : id === "custom" ? 99 : 50)
+      const list = [...c.agents].sort((a, b) => order(a.id) - order(b.id))
+      setAgents(list)
+      setAgentsError("")
+      setAgentId((cur) => (list.find((a) => a.id === cur && a.installed) ? cur : list.find((a) => a.installed && a.id !== "custom")?.id ?? "custom"))
+    } catch (e: any) { setAgentsError(e.message) }
+  }, [computer?.id, computer?.online])
+
   React.useEffect(() => {
     setAgents(null)
     setAgentsError("")
     if (!computer?.online) return
     setProjectDir((d) => d || saved.projectDirs?.[computer.id] || computer.cwd)
-    api<Config>(`/api/connectors/${computer.id}/config`, {})
-      .then((c) => {
-        const order = (id: string) => (FEATURED.includes(id) ? FEATURED.indexOf(id) : id === "custom" ? 99 : 50)
-        const list = [...c.agents].sort((a, b) => order(a.id) - order(b.id))
-        setAgents(list)
-        setAgentId((cur) => (list.find((a) => a.id === cur && a.installed) ? cur : list.find((a) => a.installed && a.id !== "custom")?.id ?? "custom"))
-      })
-      .catch((e) => setAgentsError(e.message))
+    loadAgents(false)
   }, [computer?.id, computer?.online]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function checkAgain() {
+    setChecking(true)
+    await loadAgents(true)
+    setChecking(false)
+  }
+
+  // Coming back from the terminal after signing in: look again by itself.
+  React.useEffect(() => {
+    const onVisible = () => { if (!document.hidden && agents?.some((a) => a.login === "needed")) loadAgents(true) }
+    document.addEventListener("visibilitychange", onVisible)
+    return () => document.removeEventListener("visibilitychange", onVisible)
+  }, [agents, loadAgents])
 
   const agent = agents?.find((a) => a.id === agentId)
   const featured = agents?.filter((a) => FEATURED.includes(a.id)) ?? []
@@ -180,6 +224,7 @@ export function Setup({ me, onContinue }: { config: Config; me: Me; onContinue: 
     if (!computer) return setError("Add a computer first.")
     if (!computer.online) return setError(`${computer.name} is offline. Run \`clearspec connect\` on it.`)
     if (!agent?.installed) return setError("Pick an agent that's installed on that computer.")
+    if (agent.login === "needed") return setError(`Sign in to ${agent.name} on that computer first. ${agent.loginHint}`)
     if (agentId === "custom" && !customCommand.trim()) return setError("Enter the agent's ACP launch command.")
     if (!projectDir.trim()) return setError("Choose the project folder on that computer.")
     saveForm({ agentId, connectorId, customCommand, projectDirs: { ...(saved.projectDirs ?? {}), [computer.id]: projectDir.trim() } })
@@ -250,6 +295,7 @@ export function Setup({ me, onContinue }: { config: Config; me: Me; onContinue: 
                 )}
               </RadioGroup>
             )}
+            {agent && <LoginNotice agent={agent} checking={checking} onCheck={checkAgain} />}
             {agentId === "custom" && (
               <Field>
                 <FieldLabel htmlFor="custom-cmd">ACP launch command</FieldLabel>
@@ -272,7 +318,7 @@ export function Setup({ me, onContinue }: { config: Config; me: Me; onContinue: 
         )}
 
         {error && <FieldError>{error}</FieldError>}
-        <div><Button type="submit" size="lg" disabled={!computer?.online}>Continue <ArrowRightIcon /></Button></div>
+        <div><Button type="submit" size="lg" disabled={!computer?.online || agent?.login === "needed"}>Continue <ArrowRightIcon /></Button></div>
 
         {runs.length > 0 && (
           <section className="grid gap-2">

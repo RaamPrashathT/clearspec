@@ -7,6 +7,8 @@ export type AgentInfo = {
   loginHint: string
   command: string | null
   installed: boolean
+  /** Sign-in state, asked of the CLI itself. "unknown" when the CLI has no status command (Copilot). Absent from older helpers. */
+  login?: "ok" | "needed" | "unknown"
 }
 
 export type Config = {

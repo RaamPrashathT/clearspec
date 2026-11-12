@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
+import { ModelPicker } from "@/components/app/model-picker"
 import type { ModelOption } from "@/lib/types"
 
 export type ComposerProps = {
@@ -39,7 +40,6 @@ export function Composer(p: ComposerProps) {
     await p.onSend(text)
   }
 
-  const modelItems = (p.models ?? []).map((m) => ({ value: m.value, label: m.name }))
   const effortItems = [{ value: "", label: "Effort: default" }, ...(p.efforts ?? []).map((e) => ({ value: e, label: `Effort: ${e}` }))]
 
   return (
@@ -60,15 +60,8 @@ export function Composer(p: ComposerProps) {
         {p.modelsLoading && (
           <span className="inline-flex items-center gap-1.5 px-2 text-xs text-muted-foreground"><Spinner className="size-3" /> Loading models…</span>
         )}
-        {!p.modelsLoading && modelItems.length > 0 && p.onModelChange && (
-          <Select items={modelItems} value={p.model ?? ""} onValueChange={(v) => p.onModelChange!(String(v ?? ""))}>
-            <SelectTrigger size="sm" aria-label="Model" className="max-w-56"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {(p.models ?? []).map((m) => (
-                <SelectItem key={m.value} value={m.value} title={m.description}>{m.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {!p.modelsLoading && (p.models ?? []).length > 0 && p.onModelChange && (
+          <ModelPicker models={p.models ?? []} value={p.model ?? ""} onChange={p.onModelChange} />
         )}
         {p.efforts && p.efforts.length > 0 && p.onEffortChange && (
           <Select items={effortItems} value={p.effort ?? ""} onValueChange={(v) => p.onEffortChange!(String(v ?? ""))}>
