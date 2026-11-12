@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // A new Worker, separate from any existing one. Rename here if "clearspec" is taken on your account.
+  "name": "clearspec",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "observability": { "enabled": true },
+  // The React UI (ui/dist). API, sign-in, WebSockets and spec files go to the Worker first.
+  "assets": {
+    "directory": "./ui/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/auth/*", "/ws", "/ws/*", "/files/*"]
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "USER_HUB", "class_name": "UserHub" },
+      { "name": "RUN", "class_name": "Run" },
+      { "name": "PAIRING", "class_name": "Pairing" }
+    ]
+  },
+  // SQLite-backed Durable Objects work on the Workers Free plan.
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["UserHub", "Run", "Pairing"] }],
+  "vars": {
+    // Public id of your GitHub OAuth app. Fill in after creating it (see README).
+    "GITHUB_CLIENT_ID": ""
+  }
+  // Secrets (set with `npx wrangler secret put NAME`): GITHUB_CLIENT_SECRET, SESSION_SECRET
+}
