@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { WebSocketServer } from "ws";
-import { listAgents, getAgent, splitCommand, launchCommand } from "./agents.mjs";
+import { describeAgents, getAgent, splitCommand, launchCommand } from "./agents.mjs";
 import { pickFolder } from "./folder-picker.mjs";
 import { claudeInfo, acpInfo } from "./agent-info.mjs";
 import { Session } from "./session.mjs";
@@ -95,7 +95,10 @@ export function startServer({ port = 0, skillDir, defaultProject = process.cwd()
 
       if (!authed(req)) return send(res, 401, { error: "unauthorized" });
 
-      if (p === "/api/config") return send(res, 200, { skillDir, defaultProject, agents: listAgents() });
+      if (p === "/api/config") {
+        const body = req.method === "POST" ? await readJson(req) : {};
+        return send(res, 200, { skillDir, defaultProject, agents: await describeAgents({ fresh: Boolean(body.fresh) }) });
+      }
       if (p === "/api/agent-info" && req.method === "POST") {
         const body = await readJson(req);
         try {

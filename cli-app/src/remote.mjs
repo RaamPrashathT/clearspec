@@ -146,7 +146,8 @@ export async function bridgeRun({ engine, server, runId, runToken, body }) {
 // ---------------------------------------------------------------------------------------------
 // clearspec connect
 
-const CONFIG = path.join(os.homedir(), ".clearspec", "connector.json");
+// CLEARSPEC_HOME moves the pairing file, so tests and a second server never overwrite your real pairing.
+const CONFIG = path.join(process.env.CLEARSPEC_HOME || path.join(os.homedir(), ".clearspec"), "connector.json");
 const readConfig = () => { try { return JSON.parse(fs.readFileSync(CONFIG, "utf8")); } catch { return null; } };
 function writeConfig(c) {
   fs.mkdirSync(path.dirname(CONFIG), { recursive: true });
@@ -190,7 +191,7 @@ export async function connect({ code, server, project }) {
         if (m.t === "start") {
           bridgeRun({ engine, server: cfg.server, runId: m.runId, runToken: m.runToken, body: m.body }).catch((err) => log("Run failed:", err.message));
         } else if (m.t === "rpc") {
-          const routes = { config: ["/api/config"], "agent-info": ["/api/agent-info", m.body], "pick-folder": ["/api/pick-folder", m.body] };
+          const routes = { config: ["/api/config", m.body ?? {}], "agent-info": ["/api/agent-info", m.body], "pick-folder": ["/api/pick-folder", m.body] };
           const [p, b] = routes[m.method] ?? [];
           try {
             if (!p) throw new Error(`Unknown request ${m.method}`);

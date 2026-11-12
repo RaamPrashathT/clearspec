@@ -1,8 +1,17 @@
 {
   "name": "clearspec",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Connects the clearspec web app to the coding agents on your computer (Claude Code, Codex, GitHub Copilot CLI, Cursor Agent, any ACP agent). Run: npx clearspec connect",
-  "keywords": ["requirements", "spec", "claude-code", "codex", "copilot", "cursor", "acp", "agent"],
+  "keywords": [
+    "requirements",
+    "spec",
+    "claude-code",
+    "codex",
+    "copilot",
+    "cursor",
+    "acp",
+    "agent"
+  ],
   "type": "module",
   "bin": {
     "clearspec": "bin/clearspec.mjs"
