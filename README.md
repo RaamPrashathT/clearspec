@@ -5,14 +5,14 @@ Turn an idea into a `REQUIREMENTS.md` a coding agent can build from, plus clicka
 It is a **skill first** and a web app second.
 
 ```
-skill/      the clearspec skill: SKILL.md, references, templates, check/render scripts
+skills/clearspec/  the clearspec skill: SKILL.md, references, templates, check/render scripts
 cli-app/    the `clearspec` npm package: the helper behind `npx clearspec connect`
 web-app/    the hosted app: React UI + Cloudflare Worker with Durable Objects
 ```
 
 ## 1. The skill (Claude Code)
 
-Copy `skill/` into a project as `.claude/skills/clearspec/` (the folder name must match the skill name), then run `/clearspec "an app for roommates to split shared bills"`. Output goes to `clearspec/<name>/`:
+Install it into a project with `npx skills add RaamPrashathT/clearspec`, or copy `skills/clearspec/` into `.claude/skills/clearspec/` by hand, then run `/clearspec "an app for roommates to split shared bills"`. Output goes to `clearspec/<name>/`:
 
 ```
 clearspec/<name>/

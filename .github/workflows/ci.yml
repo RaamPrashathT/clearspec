@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 22
       - name: Script syntax
-        run: for f in skill/scripts/*.mjs; do node --check "$f"; done
+        run: for f in skills/clearspec/scripts/*.mjs; do node --check "$f"; done
 
   helper:
     name: Helper (cli-app)
