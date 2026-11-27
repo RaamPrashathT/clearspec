@@ -21,7 +21,7 @@ export function resolveSkillDir(explicit) {
     explicit,
     process.env.CLEARSPEC_SKILL_DIR,
     path.join(ROOT, "skill"),        // bundled copy (npm run sync-skill)
-    path.join(ROOT, "..", "skill"),  // a checkout of this repo
+    path.join(ROOT, "..", "skills", "clearspec"),  // a checkout of this repo
   ].filter(Boolean);
   return candidates.find((d) => fs.existsSync(path.join(d, "SKILL.md"))) ?? null;
 }
