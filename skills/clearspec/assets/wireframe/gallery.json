@@ -1,0 +1,1214 @@
+{
+ "id": "_kit",
+ "title": "Component kit",
+ "shell": "none",
+ "layout": "wide",
+ "notes": [
+  "Every piece the renderer knows. Specs may only use these types."
+ ],
+ "states": {
+  "default": {
+   "label": "Kit"
+  }
+ },
+ "body": [
+  {
+   "type": "heading",
+   "text": "Component kit",
+   "sub": "Grayscale. Density (dense, standard, roomy) changes spacing and hides secondary text."
+  },
+  {
+   "type": "grid",
+   "cols": {
+    "mobile": 1,
+    "tablet": 2,
+    "desktop": 2
+   },
+   "children": [
+    {
+     "type": "card",
+     "title": "Button",
+     "description": "primary, secondary, ghost, danger; sm, md, lg; icons",
+     "children": [
+      {
+       "type": "row",
+       "wrap": true,
+       "children": [
+        {
+         "type": "button",
+         "label": "Primary",
+         "variant": "primary"
+        },
+        {
+         "type": "button",
+         "label": "Secondary"
+        },
+        {
+         "type": "button",
+         "label": "Ghost",
+         "variant": "ghost"
+        },
+        {
+         "type": "button",
+         "label": "Delete",
+         "variant": "danger",
+         "icon": "trash"
+        }
+       ]
+      },
+      {
+       "type": "row",
+       "wrap": true,
+       "children": [
+        {
+         "type": "button",
+         "label": "Small",
+         "size": "sm"
+        },
+        {
+         "type": "button",
+         "label": "Large",
+         "size": "lg",
+         "variant": "primary",
+         "iconRight": "arrow-right"
+        },
+        {
+         "type": "button",
+         "label": "Disabled",
+         "disabled": true
+        },
+        {
+         "type": "button",
+         "icon": "plus",
+         "variant": "primary"
+        },
+        {
+         "type": "button",
+         "icon": "copy"
+        },
+        {
+         "type": "button",
+         "icon": "x",
+         "variant": "ghost"
+        }
+       ]
+      },
+      {
+       "type": "row",
+       "children": [
+        {
+         "type": "link",
+         "label": "Plain link"
+        },
+        {
+         "type": "link",
+         "label": "Opens elsewhere",
+         "external": true
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "card",
+     "title": "Input, textarea, select",
+     "children": [
+      {
+       "type": "input",
+       "label": "Search",
+       "placeholder": "Search habits",
+       "icon": "search",
+       "iconRight": "x"
+      },
+      {
+       "type": "input",
+       "label": "Invite link",
+       "value": "https://app.example/join/x7Kq2",
+       "iconRight": "copy",
+       "help": "Anyone with the link can join."
+      },
+      {
+       "type": "input",
+       "label": "Email",
+       "value": "ana@platform",
+       "error": "Enter a full address, like ana@platform.dev",
+       "required": true
+      },
+      {
+       "type": "select",
+       "label": "Timezone",
+       "value": "Europe/Lisbon",
+       "options": [
+        "Europe/Lisbon",
+        "Europe/London",
+        "America/New_York"
+       ]
+      },
+      {
+       "type": "textarea",
+       "label": "Description",
+       "placeholder": "What does this habit mean for the team?",
+       "help": "Optional"
+      }
+     ]
+    },
+    {
+     "type": "card",
+     "title": "Checkbox, radio, toggle",
+     "children": [
+      {
+       "type": "checkbox",
+       "label": "Remember me",
+       "checked": true
+      },
+      {
+       "type": "checkbox",
+       "label": "Email me a weekly summary",
+       "help": "Sent Mondays at 09:00"
+      },
+      {
+       "type": "checkbox",
+       "label": "Select all",
+       "indeterminate": true
+      },
+      {
+       "type": "radio",
+       "label": "Daily",
+       "name": "c",
+       "checked": true
+      },
+      {
+       "type": "radio",
+       "label": "Weekly",
+       "name": "c"
+      },
+      {
+       "type": "toggle",
+       "label": "Private habit",
+       "on": true,
+       "help": "Only you can see it"
+      },
+      {
+       "type": "checkbox",
+       "label": "Done today",
+       "emphasis": true
+      },
+      {
+       "type": "checkbox",
+       "label": "Done today",
+       "emphasis": true,
+       "checked": true
+      }
+     ],
+     "description": "plain, and emphasis for the main repeat action"
+    },
+    {
+     "type": "card",
+     "title": "Dropdown",
+     "description": "closed trigger, and an open menu",
+     "children": [
+      {
+       "type": "row",
+       "wrap": true,
+       "justify": "start",
+       "children": [
+        {
+         "type": "dropdown",
+         "label": "Actions",
+         "items": [
+          {
+           "label": "Edit"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "type": "dropdown",
+       "label": "Options",
+       "open": true,
+       "reserve": true,
+       "icon": "settings",
+       "items": [
+        {
+         "label": "Edit habit",
+         "icon": "edit",
+         "hint": "E"
+        },
+        {
+         "label": "Copy link",
+         "icon": "copy"
+        },
+        {
+         "label": "Open in new tab",
+         "icon": "external-link"
+        },
+        {
+         "divider": true
+        },
+        {
+         "label": "Delete",
+         "icon": "trash",
+         "danger": true
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "card",
+     "title": "Badge and avatar",
+     "children": [
+      {
+       "type": "row",
+       "wrap": true,
+       "children": [
+        {
+         "type": "badge",
+         "label": "Neutral"
+        },
+        {
+         "type": "badge",
+         "label": "Solid",
+         "tone": "solid"
+        },
+        {
+         "type": "badge",
+         "label": "Outline",
+         "tone": "outline"
+        },
+        {
+         "type": "badge",
+         "label": "Dashed",
+         "tone": "dashed"
+        },
+        {
+         "type": "badge",
+         "label": "Success",
+         "tone": "success"
+        },
+        {
+         "type": "badge",
+         "label": "Failed",
+         "tone": "danger"
+        },
+        {
+         "type": "badge",
+         "label": "Pending",
+         "tone": "warning"
+        }
+       ]
+      },
+      {
+       "type": "row",
+       "children": [
+        {
+         "type": "avatar",
+         "name": "Ana Souza",
+         "size": "sm"
+        },
+        {
+         "type": "avatar",
+         "name": "Raj Patel"
+        },
+        {
+         "type": "avatar",
+         "name": "Mei Lin",
+         "size": "lg"
+        },
+        {
+         "type": "avatar-group",
+         "names": [
+          "Ana Souza",
+          "Raj Patel",
+          "Mei Lin",
+          "Lucas Ortiz",
+          "Sam Okafor",
+          "Priya Nair"
+         ],
+         "max": 4
+        }
+       ]
+      },
+      {
+       "type": "person",
+       "name": "Priya Nair",
+       "sub": "priya@platform.dev"
+      }
+     ]
+    },
+    {
+     "type": "accordion",
+     "items": [
+      {
+       "title": "How is the weekly rate worked out?",
+       "open": true,
+       "children": [
+        {
+         "type": "text",
+         "text": "Check-ins so far this week divided by members times days elapsed. Back-filled days count."
+        }
+       ]
+      },
+      {
+       "title": "Can I back-fill a missed day?",
+       "children": [
+        {
+         "type": "text",
+         "text": "Yes, up to 7 days back."
+        }
+       ]
+      },
+      {
+       "title": "What happens when someone leaves?",
+       "children": [
+        {
+         "type": "text",
+         "text": "Their history stays; they drop out of the rate."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "stack",
+     "gap": 4,
+     "children": [
+      {
+       "type": "tabs",
+       "items": [
+        {
+         "label": "Overview",
+         "active": true
+        },
+        {
+         "label": "Members",
+         "badge": 6
+        },
+        {
+         "label": "Settings"
+        }
+       ]
+      },
+      {
+       "type": "alert",
+       "tone": "info",
+       "title": "Heads up",
+       "text": "Days run in the team timezone."
+      },
+      {
+       "type": "alert",
+       "tone": "danger",
+       "title": "Couldn't save",
+       "text": "Check your connection and try again."
+      },
+      {
+       "type": "progress",
+       "label": "Weekly completion",
+       "value": 83
+      },
+      {
+       "type": "skeleton",
+       "lines": 3
+      }
+     ]
+    },
+    {
+     "type": "empty",
+     "icon": "calendar",
+     "title": "No habits yet",
+     "text": "Add the first shared habit your team wants to keep.",
+     "action": {
+      "type": "button",
+      "label": "Add habit",
+      "variant": "primary",
+      "icon": "plus"
+     }
+    }
+   ]
+  },
+  {
+   "type": "card",
+   "title": "Icons",
+   "description": "26 icons, one stroke weight",
+   "children": [
+    {
+     "type": "grid",
+     "cols": {
+      "mobile": 4,
+      "tablet": 6,
+      "desktop": 9
+     },
+     "gap": 3,
+     "children": [
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "search",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "search",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "external-link",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "external-link",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "copy",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "copy",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "x",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "x",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "check",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "check",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "plus",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "plus",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "minus",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "minus",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "chevron-down",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "chevron-down",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "chevron-up",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "chevron-up",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "chevron-left",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "chevron-left",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "chevron-right",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "chevron-right",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "menu",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "menu",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "user",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "user",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "settings",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "settings",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "trash",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "trash",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "edit",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "edit",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "more",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "more",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "info",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "info",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "alert",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "alert",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "calendar",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "calendar",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "arrow-right",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "arrow-right",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "link",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "link",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "filter",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "filter",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "image",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "image",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "mail",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "mail",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      },
+      {
+       "type": "stack",
+       "gap": 1,
+       "align": "center",
+       "children": [
+        {
+         "type": "icon",
+         "name": "lock",
+         "size": 22
+        },
+        {
+         "type": "text",
+         "text": "lock",
+         "size": "sm",
+         "muted": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "grid",
+   "cols": {
+    "mobile": 1,
+    "tablet": 3,
+    "desktop": 3
+   },
+   "gap": 3,
+   "children": [
+    {
+     "type": "stat",
+     "label": "Team rate",
+     "value": "83%",
+     "hint": "this week"
+    },
+    {
+     "type": "stat",
+     "label": "Check-ins",
+     "value": "25/30"
+    },
+    {
+     "type": "stat",
+     "label": "Streak",
+     "value": "5 days"
+    }
+   ]
+  },
+  {
+   "type": "card",
+   "title": "Status grid",
+   "description": "five cell statuses; streak goes beside the name (aside); legend sits at the bottom",
+   "children": [
+    {
+     "type": "status-grid",
+     "today": 4,
+     "legend": true,
+     "rows": [
+      {
+       "label": "Stand-up on time",
+       "aside": "Streak 3 days",
+       "cells": [
+        "done",
+        "done",
+        "backfilled",
+        "done",
+        "todo",
+        "future",
+        "future"
+       ],
+       "meta": {
+        "type": "row",
+        "gap": 3,
+        "children": [
+         {
+          "type": "badge",
+          "label": "83% this week"
+         },
+         {
+          "type": "checkbox",
+          "label": "Done today",
+          "emphasis": true
+         }
+        ]
+       }
+      },
+      {
+       "label": "Retro notes",
+       "aside": "Streak 2 days",
+       "cells": [
+        "done",
+        "missed",
+        "done",
+        "done",
+        "todo",
+        "future",
+        "future"
+       ],
+       "meta": {
+        "type": "row",
+        "gap": 3,
+        "children": [
+         {
+          "type": "badge",
+          "label": "75% this week"
+         },
+         {
+          "type": "checkbox",
+          "label": "Done today",
+          "emphasis": true
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "table",
+   "toolbar": {
+    "title": "Members",
+    "search": "Search members",
+    "actions": [
+     {
+      "type": "dropdown",
+      "label": "Filter",
+      "icon": "filter",
+      "items": [
+       {
+        "label": "All members",
+        "checked": true
+       },
+       {
+        "label": "Not yet ticked"
+       }
+      ]
+     },
+     {
+      "type": "button",
+      "label": "Invite",
+      "variant": "primary",
+      "icon": "plus"
+     }
+    ]
+   },
+   "selectable": true,
+   "rowActions": true,
+   "footer": "1 to 4 of 6 members",
+   "pager": true,
+   "columns": [
+    {
+     "key": "member",
+     "label": "Member"
+    },
+    {
+     "key": "role",
+     "label": "Role"
+    },
+    {
+     "key": "today",
+     "label": "Today"
+    },
+    {
+     "key": "week",
+     "label": "This week"
+    },
+    {
+     "key": "streak",
+     "label": "Streak",
+     "align": "right"
+    }
+   ],
+   "rows": [
+    {
+     "member": {
+      "type": "person",
+      "name": "Ana Souza",
+      "sub": "ana@platform.dev"
+     },
+     "role": {
+      "type": "badge",
+      "label": "Admin",
+      "tone": "outline"
+     },
+     "today": {
+      "type": "badge",
+      "label": "Ticked",
+      "tone": "success"
+     },
+     "week": {
+      "type": "status-strip",
+      "cells": [
+       "done",
+       "done",
+       "done",
+       "done",
+       "done",
+       "future",
+       "future"
+      ],
+      "today": 4
+     },
+     "streak": "5 days",
+     "_selected": true
+    },
+    {
+     "member": {
+      "type": "person",
+      "name": "Raj Patel",
+      "sub": "raj@platform.dev"
+     },
+     "role": "Member",
+     "today": {
+      "type": "badge",
+      "label": "Not yet"
+     },
+     "week": {
+      "type": "status-strip",
+      "cells": [
+       "done",
+       "done",
+       "backfilled",
+       "done",
+       "todo",
+       "future",
+       "future"
+      ],
+      "today": 4
+     },
+     "streak": "3 days"
+    },
+    {
+     "member": {
+      "type": "person",
+      "name": "Mei Lin",
+      "sub": "mei@platform.dev"
+     },
+     "role": "Member",
+     "today": {
+      "type": "badge",
+      "label": "Not yet"
+     },
+     "week": {
+      "type": "status-strip",
+      "cells": [
+       "done",
+       "missed",
+       "done",
+       "done",
+       "todo",
+       "future",
+       "future"
+      ],
+      "today": 4
+     },
+     "streak": "2 days"
+    },
+    {
+     "member": {
+      "type": "person",
+      "name": "Priya Nair",
+      "sub": "priya@platform.dev"
+     },
+     "role": "Member",
+     "today": {
+      "type": "badge",
+      "label": "Ticked",
+      "tone": "success"
+     },
+     "week": {
+      "type": "status-strip",
+      "cells": [
+       "done",
+       "done",
+       "done",
+       "missed",
+       "done",
+       "future",
+       "future"
+      ],
+      "today": 4
+     },
+     "streak": "1 day"
+    }
+   ]
+  },
+  {
+   "type": "card",
+   "title": "Dialog",
+   "description": "shown inline here; in a screen it goes in a state's overlay",
+   "children": [
+    {
+     "type": "dialog",
+     "static": true,
+     "title": "Delete this habit?",
+     "description": "Stand-up on time and its history will be removed for everyone.",
+     "children": [
+      {
+       "type": "checkbox",
+       "label": "I understand this cannot be undone"
+      }
+     ],
+     "actions": [
+      {
+       "type": "button",
+       "label": "Cancel"
+      },
+      {
+       "type": "button",
+       "label": "Delete habit",
+       "variant": "danger",
+       "icon": "trash"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

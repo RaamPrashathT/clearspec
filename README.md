@@ -17,8 +17,12 @@ Install it into a project with `npx skills add RaamPrashathT/clearspec`, or copy
 ```
 clearspec/<name>/
 ├── REQUIREMENTS.md      intent, decisions, phases, requirements (FR), edge cases (EC), assumptions
-└── mockups/             UI screens, or api.html + openapi.yaml, or cli.html + transcripts.md
+└── mockups/             UI: wireframes (index.html compare page, SCR-*.html, specs/) · API: api.html + openapi.yaml · CLI: cli.html + transcripts.md
 ```
+
+### UI mockups are wireframes
+
+For UI, the agent writes small JSON screen specs and a fixed grayscale component kit draws them (it never writes HTML or CSS). `mockups/index.html` shows every screen at three densities (Dense, Standard, Roomy) with the measured page height; pick one per screen and press **Finalize selected**. That saves the chosen set to `mockups/final/` and adds a "UI mockups" section to the end of `REQUIREMENTS.md`, so whoever builds the UI knows to refer to it. `check.mjs` verifies every Must requirement and every edge case appears on a screen. Tooling lives in `skills/clearspec/scripts/wireframe/`.
 
 ## 2. The web app
 

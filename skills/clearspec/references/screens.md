@@ -1,5 +1,7 @@
 # Screens (UI products)
 
+> **Superseded for UI mockups.** UI screens are now grayscale wireframes drawn from JSON specs: see `references/wireframe/`. This file is kept for the markup conventions that API and CLI pages still share.
+
 ## Contents
 - Inventory
 - Fixtures

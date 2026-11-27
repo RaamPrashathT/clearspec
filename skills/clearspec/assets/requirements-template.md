@@ -2,7 +2,7 @@
 
 Status: Draft | Confirmed · Type: <UI | API | CLI | mixed> · Date: <YYYY-MM-DD> · Phases: <n> · Modules: <none | list>
 
-<!-- For the coding agent: read §1–4 for intent, §Glossary for names, §Functional requirements and §Edge cases for behavior, §Mockups for what it looks like. IDs are permanent. Done means every Must FR in the current phase passes its Given/When/Then and every linked EC behaves as stated. Confirm each A-n before building on it. Mockups are visual and behavioral reference: match them, do not copy their code. fixtures.js doubles as seed and test data. CLI: mockups/transcripts.md is a snapshot test suite. API: mockups/openapi.yaml is the contract. -->
+<!-- For the coding agent: read §1–4 for intent, §Glossary for names, §Functional requirements and §Edge cases for behavior, §Mockups for what it looks like. IDs are permanent. Done means every Must FR in the current phase passes its Given/When/Then and every linked EC behaves as stated. Confirm each A-n before building on it. Mockups are visual and behavioral reference: match them, do not copy their code. For UI, mockups/inventory.md holds the sample data (use it as seed and test data); for API and CLI, fixtures.js does. CLI: mockups/transcripts.md is a snapshot test suite. API: mockups/openapi.yaml is the contract. -->
 
 ## 1. Overview
 
@@ -57,7 +57,7 @@ Phase: 1
 - When <action>
 - Then <observable outcome>
 Source: D-1
-Shown in: mockups/02-dashboard.html
+Shown in: SCR-dashboard
 
 <!-- Priority: Must, Should, Could. Use "Shown in: none (no UI)" when there is no surface. -->
 
@@ -67,7 +67,7 @@ Shown in: mockups/02-dashboard.html
 Scenario: <concrete, with fixture names and values>
 Expected: <behavior>
 Linked: FR-1
-State: mockups/07-move-out.html?state=blocked-balance
+State: SCR-move-out?state=blocked-balance
 
 ## 9. Data model
 
@@ -87,13 +87,13 @@ Only those with a number or a named standard: performance, privacy, accessibilit
 
 ## 12. Design direction
 
-<UI: use scene, theme, palette roles, type, density, layout sketch, signature move, rejected defaults. If the repo has a design system: name it and say "follow it". Others: "Not applicable.">
+<UI: the wireframes are grayscale; the visual design is not decided here. If the repo has a design system, name it and say "follow it". Others: "Not applicable.">
 
 ## 13. Mockups
 
 | Artifact | File | States | FRs | ECs |
 |---|---|---|---|---|
-| <NN name> | mockups/NN-name.html | populated, empty | FR-1 | EC-1 |
+| <NN name> | SCR-name (UI) or mockups/<file> | populated, empty | FR-1 | EC-1 |
 
 ## 14. Assumptions
 

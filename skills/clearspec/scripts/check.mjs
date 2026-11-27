@@ -8,6 +8,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import os from "node:os";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 const args = process.argv.slice(2);
 const asJson = args.includes("--json");
@@ -41,6 +44,10 @@ const rangeText = (ids) => (ids.length ? `${ids[0]}..${ids[ids.length - 1]}` : "
 
 const mockupsDir = path.join(unitDir, "mockups");
 const assetsDir = path.join(mockupsDir, "assets");
+// Wireframe mode: UI mockups drawn from JSON specs (mockups/specs/screens/*.json) by scripts/wireframe.
+// The old artifact checks (data-fr attributes, fixtures.js, theme contrast, index links) do not apply; the
+// wireframe block below checks the same trace (FRs and ECs on screens) plus the renderer's own lint.
+const WIRE = fs.existsSync(path.join(mockupsDir, "specs", "screens"));
 
 // ---------- Spec ----------
 
@@ -147,10 +154,10 @@ if (sharedTheme !== null && theme !== null && sharedTheme.replace(/\s+/g, "") !=
 
 // ---------- Artifacts ----------
 
-const htmlFiles = fs.existsSync(mockupsDir)
+const htmlFiles = WIRE ? [] : fs.existsSync(mockupsDir)
   ? fs.readdirSync(mockupsDir).filter((f) => f.toLowerCase().endsWith(".html")).map((f) => path.join(mockupsDir, f))
   : [];
-if (spec !== null && !htmlFiles.length) err("files", "No artifacts in mockups/.");
+if (spec !== null && !htmlFiles.length && !WIRE) err("files", "No artifacts in mockups/.");
 
 const stripComments = (s) => s.replace(/<!--[\s\S]*?-->/g, "");
 const stripBlocks = (s, names) => names.reduce((acc, t) => acc.replace(new RegExp(`<${t}\\b[\\s\\S]*?<\\/${t}>`, "gi"), ""), s);
@@ -250,6 +257,80 @@ for (const a of artifacts) {
         continue;
       }
       if (!fs.existsSync(path.resolve(mockupsDir, decodeURI(v.split(/[?#]/)[0])))) err("trace", `${rel(a.file)}: broken link ${attr}="${v}".`);
+    }
+  }
+}
+
+// ---------- Wireframes (mockups/specs/screens/*.json) ----------
+
+if (WIRE && spec !== null) {
+  const sdir = path.join(mockupsDir, "specs", "screens");
+  const screensById = new Map();
+  for (const f of fs.readdirSync(sdir).filter((x) => x.endsWith(".json")).sort()) {
+    try {
+      const s = JSON.parse(fs.readFileSync(path.join(sdir, f), "utf8"));
+      if (!s.id) err("files", `mockups/specs/screens/${f} has no "id".`);
+      else screensById.set(s.id, s);
+    } catch (e) {
+      err("files", `mockups/specs/screens/${f} is not valid JSON: ${e.message}`);
+    }
+  }
+  if (!screensById.size) err("files", "mockups/specs/screens has no screen specs.");
+  if (!fs.existsSync(path.join(mockupsDir, "specs", "app.json"))) err("files", "mockups/specs/app.json is missing.");
+
+  // The renderer must accept every spec (unknown pieces, bad links, design lint). Rendered to a temp dir.
+  const renderer = path.join(path.dirname(fileURLToPath(import.meta.url)), "wireframe", "render.mjs");
+  if (!fs.existsSync(renderer)) {
+    err("lint", "scripts/wireframe/render.mjs is missing, so the screen specs cannot be validated.");
+  } else {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "clearspec-wire-"));
+    try {
+      const r = spawnSync(process.execPath, [renderer, path.join(mockupsDir, "specs"), tmp, "--no-kit"], { encoding: "utf8" });
+      for (const line of (r.stdout || "").split("\n")) {
+        if (line.startsWith("ERROR ")) err("lint", line.slice(6));
+        else if (line.startsWith("warn")) warn("lint", line.replace(/^warn\s+/, ""));
+      }
+      if (r.status !== 0 && !(r.stdout || "").includes("ERROR ")) err("lint", `render.mjs failed: ${(r.stderr || "").split("\n")[0] || "exit " + r.status}`);
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  }
+
+  const servedFr = new Set();
+  const servedEc = new Set();
+  for (const s of screensById.values()) {
+    if (!(s.serves || []).length) warn("trace", `${s.id} has an empty "serves" list.`);
+    for (const id of s.serves || []) {
+      servedFr.add(id);
+      if (!frs.has(id)) err("trace", `${s.id} serves ${id}, which is not in REQUIREMENTS.md. Known: ${rangeText(frIds)}`);
+    }
+    for (const id of s.edge || []) {
+      servedEc.add(id);
+      if (!ecs.has(id)) err("trace", `${s.id} lists ${id} in "edge", which is not in REQUIREMENTS.md. Known: ${rangeText(ecIds)}`);
+    }
+  }
+  const screenOf = (ref) => ref.split("?")[0].trim().split("/").pop().replace(/\.html$/i, "");
+  for (const fr of frs.values()) {
+    if (fr.removed || fr.noUi) continue;
+    if (fr.priority === "Must" && !servedFr.has(fr.id)) err("trace", `${fr.id} is Must but no screen spec lists it in "serves".`);
+    for (const ref of (fr.shown || "").split(",").map((x) => x.trim()).filter(Boolean)) {
+      const s = screensById.get(screenOf(ref));
+      if (!s) err("trace", `${fr.id} "Shown in" ${ref}, which is not a screen. Screens: ${[...screensById.keys()].join(", ") || "none"}`);
+      else if (!(s.serves || []).includes(fr.id)) err("trace", `${fr.id} "Shown in" ${s.id}, but that screen's "serves" does not list ${fr.id}.`);
+    }
+  }
+  for (const ec of ecs.values()) {
+    if (ec.removed) continue;
+    if (!servedEc.has(ec.id)) err("trace", `${ec.id} is on no screen (no screen spec lists it in "edge").`);
+    if (ec.state) {
+      const [p, q] = ec.state.split("?");
+      const s = screensById.get(screenOf(p));
+      if (!s) err("trace", `${ec.id} "State" ${p.trim()}, which is not a screen.`);
+      else {
+        const st = q ? new URLSearchParams(q).get("state") : null;
+        if (st && !(s.states || {})[st]) err("trace", `${ec.id} "State" ${s.id}?state=${st}, but that screen declares no state "${st}". Declared: ${Object.keys(s.states || {}).join(", ") || "none"}`);
+        if (!(s.edge || []).includes(ec.id)) err("trace", `${ec.id} "State" is ${s.id}, but that screen's "edge" does not list ${ec.id}.`);
+      }
     }
   }
 }

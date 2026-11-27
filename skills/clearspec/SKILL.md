@@ -3,7 +3,7 @@ name: clearspec
 description: Turns an idea or half-written requirement into one consolidated REQUIREMENTS.md plus offline mockups (UI screens, API reference, or CLI transcripts). Researches the codebase and how established products solve the problem first, then asks only the product and technical questions that change what gets built.
 argument-hint: "[idea text | idea file | --next-phase | --revise]"
 disable-model-invocation: true
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/check.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/serve.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/export.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/cli-render.mjs *)
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/check.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/serve.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/export.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/cli-render.mjs *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/wireframe/*.mjs *)
 ---
 
 # clearspec
@@ -20,8 +20,9 @@ Paths like `references/…` are relative to `${CLAUDE_SKILL_DIR}`. Output goes t
 ```
 clearspec/<name>/
 ├── REQUIREMENTS.md      the one deliverable: intent, decisions, phases, FRs, ECs, assumptions
-└── mockups/             index.html + screens, or api.html + openapi.yaml, or cli.html + transcripts.md
-    └── assets/          theme.css, fixtures.js, app.js
+└── mockups/             UI: index.html (compare page) + SCR-*.html, specs/, inventory.md, final/
+                         API: api.html + openapi.yaml · CLI: cli.html + transcripts.md
+    └── assets/          API/CLI pages only: theme.css, fixtures.js, app.js
 ```
 
 ## Rules
@@ -93,23 +94,38 @@ Fill the template. Every FR has an ID, priority, phase, Given/When/Then, and `So
 
 ## 5. Mockups
 
-List the artifacts (screens, endpoint groups, or command groups), at most 12, each with its states, and every EC mapped to a state. Show the list in one message and go ahead unless the developer objects. Then read `references/screens.md` (UI) or `references/api-cli.md` (API, CLI) and build:
+List the artifacts (screens, endpoint groups, or command groups), at most 12, each with its states, and every EC mapped to a state. Show the list in one message and go ahead unless the developer objects.
+
+### UI: wireframes
+
+UI mockups are grayscale wireframes drawn from small JSON specs by a fixed component kit. **You never write HTML or CSS for UI screens.** Read `references/wireframe/kit.md`, `references/wireframe/recipes.md` and `references/wireframe/design-rules.md`, then:
+
+1. Write `mockups/inventory.md`: the screens (id `SCR-<kebab>`, title, FRs, ECs, states with their keys) and the shared sample data (people, item names, numbers, dates) used on every screen. Anything undecided is `[TBD]`.
+2. Write `mockups/specs/app.json` (name, user, nav with the exact screen names) and one `mockups/specs/screens/SCR-<kebab>.json` per screen. Each spec lists its requirements in `serves` and its edge cases in `edge`; every EC becomes a state of the screen where it happens.
+3. Validate until it exits 0 (fix every ERROR; fix warnings when cheap):
+   `node ${CLAUDE_SKILL_DIR}/scripts/wireframe/render.mjs clearspec/<name>/mockups/specs clearspec/<name>/mockups --no-kit`
+4. Build the compare page: `node ${CLAUDE_SKILL_DIR}/scripts/wireframe/compare.mjs clearspec/<name>/mockups --flat`. It writes `mockups/index.html`: every screen at Dense, Standard and Roomy side by side.
+5. In REQUIREMENTS.md refer to screens by id: an FR's `Shown in: SCR-x`, an EC's `State: SCR-x?state=<state key>`, and §Mockups lists the screens.
+
+Do not ask a design-direction question and do not choose a density: wireframes are grayscale and the developer picks the density. The developer opens `mockups/index.html`, picks a density per screen and presses **Finalize selected**. That saves the chosen set to `mockups/final/` (specs, rendered screens, a README manifest) and adds a "UI mockups" section at the end of REQUIREMENTS.md telling whoever builds the UI to refer to it. Without a browser that can save to a folder: `node ${CLAUDE_SKILL_DIR}/scripts/wireframe/assemble.mjs clearspec/<name>/mockups '<selection json>' [--default standard]` does the same.
+
+### API and CLI
+
+Read `references/api-cli.md` and build:
 
 1. Write `mockups/assets/fixtures.js` first: every name, ID, amount, and date any artifact shows.
-2. UI: write the design direction into §Design direction. If the repo has a design system or tokens, follow it and skip the design question; otherwise ask one design-direction question with ASCII sketches in the option previews.
-3. Copy `${CLAUDE_SKILL_DIR}/assets/theme.css` and `app.js` into `mockups/assets/`, set the tokens, and run the check until contrast passes.
-4. Build each artifact from `references/renderer.md`: with 4+ artifacts and a subagent tool, one subagent per artifact in parallel; otherwise one at a time here. CLI: write `mockups/transcripts.md`, then `node ${CLAUDE_SKILL_DIR}/scripts/cli-render.mjs clearspec/<name>`.
-5. Fill `mockups/index.html` from `${CLAUDE_SKILL_DIR}/assets/index.html`.
-6. UI with a browser tool: optionally run `references/critic.md` and apply its top fixes once.
+2. Copy `${CLAUDE_SKILL_DIR}/assets/theme.css` and `app.js` into `mockups/assets/`, set the tokens, and run the check until contrast passes.
+3. Build each artifact from `references/renderer.md`: with 4+ artifacts and a subagent tool, one subagent per artifact in parallel; otherwise one at a time here. CLI: write `mockups/transcripts.md`, then `node ${CLAUDE_SKILL_DIR}/scripts/cli-render.mjs clearspec/<name>`.
+4. Fill `mockups/index.html` from `${CLAUDE_SKILL_DIR}/assets/index.html`.
 
 ## 6. Check and report
 
-Run the check script until it exits 0; treat ambiguity warnings as wording to sharpen. Report in at most 10 lines: the path, counts (questions asked, FRs, ECs, assumptions, artifacts), the check summary line, how to view the mockups (open `mockups/index.html`, or `node ${CLAUDE_SKILL_DIR}/scripts/serve.mjs clearspec/<name>`), and the next phase if there is one. `node ${CLAUDE_SKILL_DIR}/scripts/export.mjs clearspec/<name>` writes single-file copies for sharing, on request.
+Run the check script until it exits 0; treat ambiguity warnings as wording to sharpen. Report in at most 10 lines: the path, counts (questions asked, FRs, ECs, assumptions, artifacts), the check summary line, how to view the mockups (open `mockups/index.html`; for UI, pick a density per screen and press Finalize selected; or `node ${CLAUDE_SKILL_DIR}/scripts/serve.mjs clearspec/<name>`), and the next phase if there is one. `node ${CLAUDE_SKILL_DIR}/scripts/export.mjs clearspec/<name>` writes single-file copies for sharing, on request.
 
 ## Later runs
 
 - **`--next-phase`:** read the spec, take the next phase's bullets, run steps 2–6 for them only (questions start from what Phase 1 left open). New FRs continue the numbering; earlier IDs never change.
-- **`--revise`** (or a change request): record the new decision, update the affected FRs and ECs, re-render only the affected artifacts, run the check again.
+- **`--revise`** (or a change request): record the new decision, update the affected FRs and ECs, re-render only the affected artifacts (for UI, edit the affected screen specs and re-run `compare.mjs --flat`), run the check again. If `mockups/final/` exists, tell the developer it is stale until they Finalize again.
 
 ## Rationalizations
 
